@@ -13,7 +13,6 @@ import {
     CardHeader,
     CardTitle,
 } from '@/components/ui/card'
-import { useAuthStore } from '@/stores/authStore'
 
 /**
  * 统计卡片组件
@@ -58,15 +57,6 @@ function StatCard({ title, value, description, icon, colorClass }: StatCardProps
  */
 export default function DashboardPage() {
     const navigate = useNavigate()
-    const { user, logout } = useAuthStore()
-
-    /**
-     * 处理登出操作
-     */
-    const handleLogout = () => {
-        logout()
-        navigate('/login')
-    }
 
     // 模拟统计数据
     const stats = {
@@ -78,42 +68,6 @@ export default function DashboardPage() {
 
     return (
         <div className="min-h-screen bg-background">
-            {/* 顶部导航栏 */}
-            <header className="border-b bg-card">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                    <div className="flex justify-between items-center h-16">
-                        {/* Logo */}
-                        <div className="flex items-center gap-3">
-                            <div className="w-8 h-8 bg-linear-to-br from-primary to-purple-600 rounded-lg flex items-center justify-center">
-                                <svg
-                                    className="w-5 h-5 text-primary-foreground"
-                                    fill="none"
-                                    stroke="currentColor"
-                                    viewBox="0 0 24 24"
-                                >
-                                    <path
-                                        strokeLinecap="round"
-                                        strokeLinejoin="round"
-                                        strokeWidth={2}
-                                        d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
-                                    />
-                                </svg>
-                            </div>
-                            <span className="text-lg font-semibold">审批系统</span>
-                        </div>
-
-                        {/* 用户信息和操作 */}
-                        <div className="flex items-center gap-4">
-                            <span className="text-sm text-muted-foreground">
-                                欢迎，<span className="font-medium text-foreground">{user?.username}</span>
-                            </span>
-                            <Button variant="outline" size="sm" onClick={handleLogout}>
-                                退出登录
-                            </Button>
-                        </div>
-                    </div>
-                </div>
-            </header>
 
             {/* 主内容区 */}
             <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">

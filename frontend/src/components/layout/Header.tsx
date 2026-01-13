@@ -16,6 +16,7 @@ import {
     DropdownMenuSeparator,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
+import { Breadcrumbs } from './Breadcrumbs'
 
 
 export function Header() {
@@ -33,6 +34,9 @@ export function Header() {
                 <Menu className="h-5 w-5" />
                 <span className="sr-only">Toggle Sidebar</span>
             </Button>
+
+            <Breadcrumbs />
+
 
             <div className="flex flex-1 items-center justify-end gap-4">
                 {user && (

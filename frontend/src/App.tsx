@@ -46,9 +46,11 @@ function App() {
             <Route path="/profile" element={<ProfilePage />} />
             <Route path="/notifications" element={<NotificationsPage />} />
 
-            {/* 管理员路由 */}
-            <Route path="/admin/users" element={<MemberManagementPage />} />
-            <Route path="/admin/workflows" element={<WorkflowConfigPage />} />
+            {/* 管理员路由 -仅管理员可见 */}
+            <Route element={<ProtectedRoute allowedRoles={['admin']} />}>
+              <Route path="/admin/users" element={<MemberManagementPage />} />
+              <Route path="/admin/workflows" element={<WorkflowConfigPage />} />
+            </Route>
           </Route>
         </Route>
 
