@@ -15,7 +15,7 @@ import {
     CardTitle,
 } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
-import { useAuthStore } from '@/stores/authStore'
+
 
 /**
  * 审批状态类型
@@ -116,19 +116,13 @@ function getStatusBadge(status: ApprovalItem['status']) {
  */
 export default function ApprovalListPage() {
     const navigate = useNavigate()
-    const { user, logout } = useAuthStore()
+    // const { user, logout } = useAuthStore() // Removed unused
 
     // 筛选状态
     const [filter, setFilter] = useState<ApprovalStatus>('all')
     const [searchQuery, setSearchQuery] = useState('')
 
-    /**
-     * 处理登出操作
-     */
-    const handleLogout = () => {
-        logout()
-        navigate('/login')
-    }
+    // Removed unused handleLogout
 
     // 过滤审批列表
     const filteredApprovals = mockApprovals.filter((item) => {
@@ -150,38 +144,7 @@ export default function ApprovalListPage() {
 
     return (
         <div className="min-h-screen bg-background">
-            {/* 顶部导航栏 */}
-            <header className="border-b bg-card sticky top-0 z-10">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                    <div className="flex justify-between items-center h-16">
-                        {/* Logo */}
-                        <div className="flex items-center gap-3">
-                            <Button
-                                variant="ghost"
-                                size="sm"
-                                onClick={() => navigate('/dashboard')}
-                            >
-                                <svg className="w-5 h-5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-                                </svg>
-                                返回
-                            </Button>
-                            <div className="h-6 w-px bg-border" />
-                            <span className="text-lg font-semibold">审批列表</span>
-                        </div>
 
-                        {/* 用户信息和操作 */}
-                        <div className="flex items-center gap-4">
-                            <span className="text-sm text-muted-foreground hidden sm:inline">
-                                欢迎，<span className="font-medium text-foreground">{user?.username}</span>
-                            </span>
-                            <Button variant="outline" size="sm" onClick={handleLogout}>
-                                退出
-                            </Button>
-                        </div>
-                    </div>
-                </div>
-            </header>
 
             {/* 主内容区 */}
             <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">

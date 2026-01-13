@@ -8,6 +8,7 @@ import { Menu, User } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { useSidebarStore } from '@/stores/sidebarStore'
 import { useAuthStore } from '@/stores/authStore'
+import { useNavigate } from 'react-router-dom'
 import {
     DropdownMenu,
     DropdownMenuContent,
@@ -16,9 +17,11 @@ import {
     DropdownMenuSeparator,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
+import { Breadcrumbs } from './Breadcrumbs'
 
 
 export function Header() {
+    const navigate = useNavigate()
     const { toggle } = useSidebarStore()
     const { user, logout } = useAuthStore()
 
@@ -33,6 +36,9 @@ export function Header() {
                 <Menu className="h-5 w-5" />
                 <span className="sr-only">Toggle Sidebar</span>
             </Button>
+
+            <Breadcrumbs />
+
 
             <div className="flex flex-1 items-center justify-end gap-4">
                 {user && (
@@ -51,9 +57,11 @@ export function Header() {
                     <DropdownMenuContent align="end">
                         <DropdownMenuLabel>我的账户</DropdownMenuLabel>
                         <DropdownMenuSeparator />
-                        {/* <DropdownMenuItem>个人中心</DropdownMenuItem> */}
+                        <DropdownMenuItem onClick={() => navigate('/profile')} className="cursor-pointer">
+                            个人中心
+                        </DropdownMenuItem>
                         {/* <DropdownMenuItem>设置</DropdownMenuItem> */}
-                        {/* <DropdownMenuSeparator /> */}
+                        <DropdownMenuSeparator />
                         <DropdownMenuItem onClick={logout} className="text-destructive focus:text-destructive cursor-pointer">
                             退出登录
                         </DropdownMenuItem>

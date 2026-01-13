@@ -10,6 +10,10 @@ import {
     LayoutDashboard,
     FileText,
     LogOut,
+    User,
+    ClipboardList,
+    Users,
+    Settings,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
@@ -32,19 +36,60 @@ interface SidebarProps {
 export function Sidebar({ className }: SidebarProps) {
     const { pathname } = useLocation()
     const { isOpen, setOpen } = useSidebarStore()
-    const { logout } = useAuthStore()
+    const { logout, user } = useAuthStore()
 
     const links = [
         {
-            href: '/dashboard',
-            label: '仪表盘',
-            icon: LayoutDashboard,
+            title: '核心功能',
+            items: [
+                {
+                    href: '/dashboard',
+                    label: '仪表盘',
+                    icon: LayoutDashboard,
+                },
+                {
+                    href: '/notifications',
+                    label: '消息通知',
+                    icon: FileText, // 暂时用FileText，如果有Bell更好
+                },
+                {
+                    href: '/profile',
+                    label: '个人资料',
+                    icon: User,
+                },
+            ]
         },
         {
-            href: '/approval',
-            label: '审批列表',
-            icon: FileText,
+            title: '审批管理',
+            items: [
+                {
+                    href: '/approval',
+                    label: '审批列表',
+                    icon: FileText,
+                },
+                {
+                    href: '/approval/new',
+                    label: '发起审批',
+                    icon: ClipboardList,
+                },
+            ]
         },
+        {
+            title: '系统管理',
+            role: 'admin', // 仅管理员可见
+            items: [
+                {
+                    href: '/admin/users',
+                    label: '成员管理',
+                    icon: Users,
+                },
+                {
+                    href: '/admin/workflows',
+                    label: '流程配置',
+                    icon: Settings,
+                },
+            ]
+        }
     ]
 
     // 侧边栏内容
@@ -59,26 +104,41 @@ export function Sidebar({ className }: SidebarProps) {
 
             {/* 导航菜单 */}
             <div className="flex-1 py-6 px-4 overflow-y-auto">
-                <nav className="space-y-2">
-                    {links.map((link) => {
-                        const Icon = link.icon
-                        const isActive = pathname === link.href
+                <nav className="space-y-6">
+                    {links.map((group, index) => {
+                        // 简单的角色检查：如果组有 role 属性且用户角色不匹配，则不渲染
+                        // 注意：这里假设 user.role 是字符串。实际项目中应该用更严谨的检查函数。
+                        if (group.role && user?.role !== group.role) {
+                            return null
+                        }
 
                         return (
-                            <Link
-                                key={link.href}
-                                to={link.href}
-                                className={cn(
-                                    'flex items-center gap-3 px-3 py-2 rounded-md transition-colors text-sm font-medium',
-                                    isActive
-                                        ? 'bg-primary text-primary-foreground'
-                                        : 'hover:bg-muted text-muted-foreground hover:text-foreground'
-                                )}
-                                onClick={() => setOpen(false)}
-                            >
-                                <Icon className="h-4 w-4" />
-                                {link.label}
-                            </Link>
+                            <div key={index} className="space-y-2">
+                                <h4 className="font-medium text-sm text-muted-foreground px-3">
+                                    {group.title}
+                                </h4>
+                                {group.items.map((link) => {
+                                    const Icon = link.icon
+                                    const isActive = pathname === link.href
+
+                                    return (
+                                        <Link
+                                            key={link.href}
+                                            to={link.href}
+                                            className={cn(
+                                                'flex items-center gap-3 px-3 py-2 rounded-md transition-colors text-sm font-medium',
+                                                isActive
+                                                    ? 'bg-primary text-primary-foreground'
+                                                    : 'hover:bg-muted text-muted-foreground hover:text-foreground'
+                                            )}
+                                            onClick={() => setOpen(false)}
+                                        >
+                                            <Icon className="h-4 w-4" />
+                                            {link.label}
+                                        </Link>
+                                    )
+                                })}
+                            </div>
                         )
                     })}
                 </nav>

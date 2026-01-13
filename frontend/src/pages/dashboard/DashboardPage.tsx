@@ -13,7 +13,6 @@ import {
     CardHeader,
     CardTitle,
 } from '@/components/ui/card'
-import { useAuthStore } from '@/stores/authStore'
 
 /**
  * 统计卡片组件
@@ -30,11 +29,15 @@ interface StatCardProps {
     description: string
     icon: React.ReactNode
     colorClass: string
+    onClick?: () => void
 }
 
-function StatCard({ title, value, description, icon, colorClass }: StatCardProps) {
+function StatCard({ title, value, description, icon, colorClass, onClick }: StatCardProps) {
     return (
-        <Card className="hover:shadow-lg transition-shadow duration-200">
+        <Card
+            className={`hover:shadow-lg transition-shadow duration-200 ${onClick ? 'cursor-pointer' : ''}`}
+            onClick={onClick}
+        >
             <CardHeader className="flex flex-row items-center justify-between pb-2">
                 <CardTitle className="text-sm font-medium text-muted-foreground">
                     {title}
@@ -58,15 +61,6 @@ function StatCard({ title, value, description, icon, colorClass }: StatCardProps
  */
 export default function DashboardPage() {
     const navigate = useNavigate()
-    const { user, logout } = useAuthStore()
-
-    /**
-     * 处理登出操作
-     */
-    const handleLogout = () => {
-        logout()
-        navigate('/login')
-    }
 
     // 模拟统计数据
     const stats = {
@@ -78,42 +72,6 @@ export default function DashboardPage() {
 
     return (
         <div className="min-h-screen bg-background">
-            {/* 顶部导航栏 */}
-            <header className="border-b bg-card">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                    <div className="flex justify-between items-center h-16">
-                        {/* Logo */}
-                        <div className="flex items-center gap-3">
-                            <div className="w-8 h-8 bg-linear-to-br from-primary to-purple-600 rounded-lg flex items-center justify-center">
-                                <svg
-                                    className="w-5 h-5 text-primary-foreground"
-                                    fill="none"
-                                    stroke="currentColor"
-                                    viewBox="0 0 24 24"
-                                >
-                                    <path
-                                        strokeLinecap="round"
-                                        strokeLinejoin="round"
-                                        strokeWidth={2}
-                                        d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
-                                    />
-                                </svg>
-                            </div>
-                            <span className="text-lg font-semibold">审批系统</span>
-                        </div>
-
-                        {/* 用户信息和操作 */}
-                        <div className="flex items-center gap-4">
-                            <span className="text-sm text-muted-foreground">
-                                欢迎，<span className="font-medium text-foreground">{user?.username}</span>
-                            </span>
-                            <Button variant="outline" size="sm" onClick={handleLogout}>
-                                退出登录
-                            </Button>
-                        </div>
-                    </div>
-                </div>
-            </header>
 
             {/* 主内容区 */}
             <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -137,6 +95,7 @@ export default function DashboardPage() {
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                             </svg>
                         }
+                        onClick={() => navigate('/approval?status=pending')}
                     />
                     <StatCard
                         title="已通过"
@@ -148,6 +107,7 @@ export default function DashboardPage() {
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                             </svg>
                         }
+                        onClick={() => navigate('/approval?status=approved')}
                     />
                     <StatCard
                         title="已拒绝"
@@ -159,6 +119,7 @@ export default function DashboardPage() {
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                             </svg>
                         }
+                        onClick={() => navigate('/approval?status=rejected')}
                     />
                     <StatCard
                         title="总计"
@@ -170,6 +131,7 @@ export default function DashboardPage() {
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
                             </svg>
                         }
+                        onClick={() => navigate('/approval')}
                     />
                 </div>
 
@@ -183,7 +145,7 @@ export default function DashboardPage() {
                         <CardContent className="grid grid-cols-2 gap-4">
                             <Button
                                 variant="outline"
-                                className="h-20 flex flex-col gap-2"
+                                className="h-20 flex flex-col gap-2 cursor-pointer"
                                 onClick={() => navigate('/approval')}
                             >
                                 <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -193,7 +155,7 @@ export default function DashboardPage() {
                             </Button>
                             <Button
                                 variant="outline"
-                                className="h-20 flex flex-col gap-2"
+                                className="h-20 flex flex-col gap-2 cursor-pointer"
                                 onClick={() => navigate('/approval/new')}
                             >
                                 <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -203,7 +165,8 @@ export default function DashboardPage() {
                             </Button>
                             <Button
                                 variant="outline"
-                                className="h-20 flex flex-col gap-2"
+                                className="h-20 flex flex-col gap-2 cursor-pointer"
+                                onClick={() => navigate('/admin/workflows')}
                             >
                                 <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
@@ -213,7 +176,8 @@ export default function DashboardPage() {
                             </Button>
                             <Button
                                 variant="outline"
-                                className="h-20 flex flex-col gap-2"
+                                className="h-20 flex flex-col gap-2 cursor-pointer"
+                                onClick={() => navigate('/profile')}
                             >
                                 <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
