@@ -4,9 +4,9 @@
 
 | 技术 | 版本 | 说明 |
 |------|------|------|
-| Tailwind CSS | 3.x | 原子化 CSS 框架 |
-| PostCSS | 8.x | CSS 处理器 |
-| Autoprefixer | 10.x | 自动添加浏览器前缀 |
+| Tailwind CSS | 4.1.18 | 原子化 CSS 框架 |
+| PostCSS | 8.5.6 | CSS 处理器 |
+| Autoprefixer | 10.4.23 | 自动添加浏览器前缀 |
 
 ## 2. 安装配置
 
