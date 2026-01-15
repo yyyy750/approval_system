@@ -14,6 +14,7 @@ import {
     ClipboardList,
     Users,
     Settings,
+    Building2,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
@@ -79,6 +80,11 @@ export function Sidebar({ className }: SidebarProps) {
             role: 'admin', // 仅管理员可见
             items: [
                 {
+                    href: '/admin/departments',
+                    label: '部门管理',
+                    icon: Building2,
+                },
+                {
                     href: '/admin/users',
                     label: '成员管理',
                     icon: Users,
@@ -106,9 +112,9 @@ export function Sidebar({ className }: SidebarProps) {
             <div className="flex-1 py-6 px-4 overflow-y-auto">
                 <nav className="space-y-6">
                     {links.map((group, index) => {
-                        // 简单的角色检查：如果组有 role 属性且用户角色不匹配，则不渲染
-                        // 注意：这里假设 user.role 是字符串。实际项目中应该用更严谨的检查函数。
-                        if (group.role && user?.role !== group.role) {
+                        // 角色检查：superadmin 拥有 admin 的所有权限
+                        // 如果组有 role='admin' 属性，则 admin 和 superadmin 都可以访问
+                        if (group.role === 'admin' && user?.role !== 'admin' && user?.role !== 'superadmin') {
                             return null
                         }
 
