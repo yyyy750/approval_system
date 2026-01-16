@@ -35,7 +35,23 @@ import {
 } from '@/components/ui/select'
 import { Switch } from '@/components/ui/switch'
 import {
+    Popover,
+    PopoverContent,
+    PopoverTrigger,
+} from '@/components/ui/popover'
+import {
+    Command,
+    CommandEmpty,
+    CommandGroup,
+    CommandInput,
+    CommandItem,
+    CommandList,
+} from '@/components/ui/command'
+import { Check, ChevronsUpDown } from 'lucide-react'
+import { cn } from '@/lib/utils'
+import {
     getWorkflows,
+    getWorkflowDetail,
     createWorkflow,
     updateWorkflow,
     deleteWorkflow,
@@ -43,11 +59,15 @@ import {
     type WorkflowNode,
 } from '@/services/workflowService'
 import { getApprovalTypes, type ApprovalType } from '@/services/approvalService'
+import { getAllUsers, type User } from '@/services/userService'
+import { getAllPositions, type Position } from '@/services/positionService'
 import { toast } from 'sonner'
 
 export default function WorkflowConfigPage() {
     const [workflows, setWorkflows] = useState<Workflow[]>([])
     const [approvalTypes, setApprovalTypes] = useState<ApprovalType[]>([])
+    const [users, setUsers] = useState<User[]>([])
+    const [positions, setPositions] = useState<Position[]>([])
     const [loading, setLoading] = useState(true)
     const [dialogOpen, setDialogOpen] = useState(false)
     const [editingWorkflow, setEditingWorkflow] = useState<Workflow | null>(null)
@@ -67,17 +87,21 @@ export default function WorkflowConfigPage() {
     }, [])
 
     /**
-     * 加载工作流列表和审批类型
+     * 加载工作流列表、审批类型、用户列表和职位列表
      */
     const loadData = async () => {
         setLoading(true)
         try {
-            const [workflowData, typeData] = await Promise.all([
+            const [workflowData, typeData, userData, positionData] = await Promise.all([
                 getWorkflows(1, 100),
                 getApprovalTypes(),
+                getAllUsers(),
+                getAllPositions(),
             ])
             setWorkflows(workflowData.list)
             setApprovalTypes(typeData)
+            setUsers(userData)
+            setPositions(positionData)
         } catch (error) {
             console.error('加载数据失败:', error)
             toast.error('加载数据失败')
@@ -105,17 +129,26 @@ export default function WorkflowConfigPage() {
 
     /**
      * 打开编辑对话框
+     *
+     * 需要先获取工作流详情，因为列表 API 不返回节点数据
      */
-    const handleEdit = (workflow: Workflow) => {
-        setEditingWorkflow(workflow)
-        setFormData({
-            name: workflow.name,
-            typeCode: workflow.typeCode,
-            description: workflow.description || '',
-            status: workflow.status,
-            nodes: workflow.nodes || [],
-        })
-        setDialogOpen(true)
+    const handleEdit = async (workflow: Workflow) => {
+        try {
+            // 获取完整的工作流详情（包括节点列表）
+            const detail = await getWorkflowDetail(workflow.id)
+            setEditingWorkflow(detail)
+            setFormData({
+                name: detail.name,
+                typeCode: detail.typeCode,
+                description: detail.description || '',
+                status: detail.status,
+                nodes: detail.nodes || [],
+            })
+            setDialogOpen(true)
+        } catch (error) {
+            console.error('获取工作流详情失败:', error)
+            toast.error('获取工作流详情失败')
+        }
     }
 
     /**
@@ -224,6 +257,116 @@ export default function WorkflowConfigPage() {
         { value: 'POSITION', label: '指定职位' },
         { value: 'DEPARTMENT_HEAD', label: '部门负责人' },
     ]
+
+    /**
+     * 用户 Combobox 选择器组件
+     */
+    const UserCombobox = ({ value, onChange }: { value?: number; onChange: (id?: number) => void }) => {
+        const [open, setOpen] = useState(false)
+        const selectedUser = users.find(u => u.id === value)
+
+        return (
+            <Popover open={open} onOpenChange={setOpen}>
+                <PopoverTrigger asChild>
+                    <Button
+                        variant="outline"
+                        role="combobox"
+                        aria-expanded={open}
+                        className="w-full justify-between font-normal"
+                    >
+                        {selectedUser ? selectedUser.nickname : '选择用户...'}
+                        <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                    </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-[250px] p-0" align="start">
+                    <Command>
+                        <CommandInput placeholder="搜索用户..." className="h-9" />
+                        <CommandList>
+                            <CommandEmpty>未找到用户</CommandEmpty>
+                            <CommandGroup>
+                                {users.map(user => (
+                                    <CommandItem
+                                        key={user.id}
+                                        value={`${user.nickname} ${user.username}`}
+                                        onSelect={() => {
+                                            onChange(user.id)
+                                            setOpen(false)
+                                        }}
+                                    >
+                                        <div className="flex flex-col">
+                                            <span>{user.nickname}</span>
+                                            <span className="text-xs text-muted-foreground">{user.username}</span>
+                                        </div>
+                                        <Check
+                                            className={cn(
+                                                'ml-auto h-4 w-4',
+                                                value === user.id ? 'opacity-100' : 'opacity-0'
+                                            )}
+                                        />
+                                    </CommandItem>
+                                ))}
+                            </CommandGroup>
+                        </CommandList>
+                    </Command>
+                </PopoverContent>
+            </Popover>
+        )
+    }
+
+    /**
+     * 职位 Combobox 选择器组件
+     */
+    const PositionCombobox = ({ value, onChange }: { value?: number; onChange: (id?: number) => void }) => {
+        const [open, setOpen] = useState(false)
+        const selectedPosition = positions.find(p => p.id === value)
+
+        return (
+            <Popover open={open} onOpenChange={setOpen}>
+                <PopoverTrigger asChild>
+                    <Button
+                        variant="outline"
+                        role="combobox"
+                        aria-expanded={open}
+                        className="w-full justify-between font-normal"
+                    >
+                        {selectedPosition ? selectedPosition.name : '选择职位...'}
+                        <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                    </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-[250px] p-0" align="start">
+                    <Command>
+                        <CommandInput placeholder="搜索职位..." className="h-9" />
+                        <CommandList>
+                            <CommandEmpty>未找到职位</CommandEmpty>
+                            <CommandGroup>
+                                {positions.map(position => (
+                                    <CommandItem
+                                        key={position.id}
+                                        value={`${position.name} ${position.code}`}
+                                        onSelect={() => {
+                                            onChange(position.id)
+                                            setOpen(false)
+                                        }}
+                                    >
+                                        <div className="flex flex-col">
+                                            <span>{position.name}</span>
+                                            <span className="text-xs text-muted-foreground">{position.code}</span>
+                                        </div>
+                                        <Check
+                                            className={cn(
+                                                'ml-auto h-4 w-4',
+                                                value === position.id ? 'opacity-100' : 'opacity-0'
+                                            )}
+                                        />
+                                    </CommandItem>
+                                ))}
+                            </CommandGroup>
+                        </CommandList>
+                    </Command>
+                </PopoverContent>
+            </Popover>
+        )
+    }
 
     return (
         <PageContainer
@@ -377,7 +520,11 @@ export default function WorkflowConfigPage() {
                                                         <Label className="text-xs">审批人类型</Label>
                                                         <Select
                                                             value={node.approverType}
-                                                            onValueChange={(value) => updateNode(index, 'approverType', value)}
+                                                            onValueChange={(value) => {
+                                                                // 切换类型时清空已选择的审批人
+                                                                updateNode(index, 'approverType', value)
+                                                                updateNode(index, 'approverId', undefined)
+                                                            }}
                                                         >
                                                             <SelectTrigger>
                                                                 <SelectValue />
@@ -392,16 +539,23 @@ export default function WorkflowConfigPage() {
                                                         </Select>
                                                     </div>
                                                 </div>
-                                                {(node.approverType === 'USER' || node.approverType === 'POSITION') && (
+                                                {/* 用户选择器 */}
+                                                {node.approverType === 'USER' && (
                                                     <div>
-                                                        <Label className="text-xs">
-                                                            {node.approverType === 'USER' ? '用户ID' : '职位ID'}
-                                                        </Label>
-                                                        <Input
-                                                            type="number"
-                                                            value={node.approverId || ''}
-                                                            onChange={(e) => updateNode(index, 'approverId', parseInt(e.target.value) || undefined)}
-                                                            placeholder="请输入ID"
+                                                        <Label className="text-xs">选择用户</Label>
+                                                        <UserCombobox
+                                                            value={node.approverId}
+                                                            onChange={(id) => updateNode(index, 'approverId', id)}
+                                                        />
+                                                    </div>
+                                                )}
+                                                {/* 职位选择器 */}
+                                                {node.approverType === 'POSITION' && (
+                                                    <div>
+                                                        <Label className="text-xs">选择职位</Label>
+                                                        <PositionCombobox
+                                                            value={node.approverId}
+                                                            onChange={(id) => updateNode(index, 'approverId', id)}
                                                         />
                                                     </div>
                                                 )}

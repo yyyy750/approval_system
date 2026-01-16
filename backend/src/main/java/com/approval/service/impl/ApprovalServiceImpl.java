@@ -4,6 +4,7 @@ import com.approval.dto.ApprovalCreateRequest;
 import com.approval.entity.*;
 import com.approval.exception.BusinessException;
 import com.approval.mapper.*;
+import com.approval.mapper.SysUserPositionMapper;
 import com.approval.service.ApprovalService;
 import com.approval.service.FileService;
 import com.approval.service.NotificationService;
@@ -37,6 +38,7 @@ public class ApprovalServiceImpl implements ApprovalService {
     private final FileService fileService;
     private final AttachmentMapper attachmentMapper;
     private final NotificationService notificationService;
+    private final SysUserPositionMapper sysUserPositionMapper;
 
     /**
      * 审批状态常量
@@ -375,9 +377,16 @@ public class ApprovalServiceImpl implements ApprovalService {
                 // 如果没有部门负责人，回退到管理员（ID=1）
                 return 1L;
             case "POSITION":
-                // 按职位审批（简化处理：返回指定的职位ID对应的用户）
-                // 实际应该查询 sys_user_position 表
-                return nodeTemplate.getApproverId();
+                // 按职位审批：查询 sys_user_position 表获取拥有该职位的用户
+                if (nodeTemplate.getApproverId() != null) {
+                    Long userIdByPosition = sysUserPositionMapper
+                            .selectFirstUserIdByPositionId(nodeTemplate.getApproverId());
+                    if (userIdByPosition != null) {
+                        return userIdByPosition;
+                    }
+                }
+                // 如果没有找到拥有该职位的用户，回退到管理员（ID=1）
+                return 1L;
             default:
                 return 1L;
         }

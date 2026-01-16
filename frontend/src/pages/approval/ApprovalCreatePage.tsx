@@ -92,7 +92,7 @@ export default function ApprovalCreatePage() {
                 typeCode: selectedType!.code,
                 content: JSON.stringify(contentObj),
                 priority: parseInt(priority),
-                deadline: deadline || undefined,
+                deadline: deadline ? `${deadline}T23:59:59` : undefined,
                 attachmentIds: attachments.map(f => f.id),
             })
 
