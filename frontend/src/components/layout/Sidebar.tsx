@@ -90,6 +90,11 @@ export function Sidebar({ className }: SidebarProps) {
                     icon: Users,
                 },
                 {
+                    href: '/admin/approval-types',
+                    label: '审批类型',
+                    icon: ClipboardList,
+                },
+                {
                     href: '/admin/workflows',
                     label: '流程配置',
                     icon: Settings,
