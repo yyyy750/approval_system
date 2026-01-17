@@ -32,6 +32,12 @@ public enum LogModule {
     /** 文件管理 - 文件上传、下载、删除操作 */
     FILE("FILE", "文件管理"),
 
+    /** 职位管理 - 职位的查询操作 */
+    POSITION("POSITION", "职位管理"),
+
+    /** 通知管理 - 通知的查询和标记操作 */
+    NOTIFICATION("NOTIFICATION", "通知管理"),
+
     /** 系统配置 - 系统参数配置操作 */
     SYSTEM("SYSTEM", "系统配置");
 

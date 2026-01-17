@@ -56,7 +56,7 @@ public class OperationLogAspect {
         // 获取请求上下文
         HttpServletRequest request = getRequest();
 
-        // 获取当前用户ID
+        // 获取当前用户ID（可能为null，登录时会从结果中获取）
         Long userId = SecurityUtils.getCurrentUserId(userMapper);
 
         // 获取客户端信息
@@ -75,6 +75,11 @@ public class OperationLogAspect {
 
             // 尝试从结果中提取目标ID
             targetId = extractTargetId(result);
+
+            // 对于登录操作，从返回结果中提取用户ID
+            if (userId == null || userId == 0L) {
+                userId = extractUserIdFromLoginResult(result);
+            }
 
             return result;
         } catch (Throwable e) {
@@ -222,6 +227,38 @@ public class OperationLogAspect {
             }
         } catch (Exception e) {
             log.debug("提取目标ID失败", e);
+        }
+
+        return null;
+    }
+
+    /**
+     * 从登录结果中提取用户ID
+     * 用于登录操作日志记录
+     */
+    private Long extractUserIdFromLoginResult(Object result) {
+        if (result == null) {
+            return null;
+        }
+
+        try {
+            // 尝试从 Result<LoginResponse> 中提取用户ID
+            if (result.getClass().getSimpleName().equals("Result")) {
+                Object data = result.getClass().getMethod("getData").invoke(result);
+                if (data != null && data.getClass().getSimpleName().equals("LoginResponse")) {
+                    // 获取 user 对象
+                    Object user = data.getClass().getMethod("getUser").invoke(data);
+                    if (user != null) {
+                        // 获取 user.id
+                        Object userId = user.getClass().getMethod("getId").invoke(user);
+                        if (userId instanceof Long) {
+                            return (Long) userId;
+                        }
+                    }
+                }
+            }
+        } catch (Exception e) {
+            log.debug("从登录结果中提取用户ID失败", e);
         }
 
         return null;

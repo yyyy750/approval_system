@@ -94,6 +94,7 @@ public class OperationLogServiceImpl implements OperationLogService {
                 queryDTO.getModule(),
                 queryDTO.getOperation(),
                 queryDTO.getUserId(),
+                queryDTO.getUsernameKeyword(),
                 queryDTO.getTargetId(),
                 startTime,
                 endTime,

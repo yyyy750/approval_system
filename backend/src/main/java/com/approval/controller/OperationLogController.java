@@ -28,15 +28,16 @@ public class OperationLogController {
     /**
      * 分页查询操作日志列表
      *
-     * @param page      页码
-     * @param pageSize  每页条数
-     * @param module    模块筛选
-     * @param operation 操作类型筛选
-     * @param userId    用户ID筛选
-     * @param targetId  目标业务ID
-     * @param startDate 开始日期
-     * @param endDate   结束日期
-     * @param keyword   详情关键词搜索
+     * @param page            页码
+     * @param pageSize        每页条数
+     * @param module          模块筛选
+     * @param operation       操作类型筛选
+     * @param userId          用户ID筛选
+     * @param usernameKeyword 用户名/昵称关键词搜索
+     * @param targetId        目标业务ID
+     * @param startDate       开始日期
+     * @param endDate         结束日期
+     * @param keyword         详情关键词搜索
      * @return 分页日志列表
      */
     @GetMapping
@@ -46,6 +47,7 @@ public class OperationLogController {
             @RequestParam(required = false) String module,
             @RequestParam(required = false) String operation,
             @RequestParam(required = false) Long userId,
+            @RequestParam(required = false) String usernameKeyword,
             @RequestParam(required = false) String targetId,
             @RequestParam(required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate startDate,
             @RequestParam(required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate endDate,
@@ -56,6 +58,7 @@ public class OperationLogController {
         queryDTO.setModule(module);
         queryDTO.setOperation(operation);
         queryDTO.setUserId(userId);
+        queryDTO.setUsernameKeyword(usernameKeyword);
         queryDTO.setTargetId(targetId);
         queryDTO.setStartDate(startDate);
         queryDTO.setEndDate(endDate);

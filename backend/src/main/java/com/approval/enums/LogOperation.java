@@ -54,7 +54,10 @@ public enum LogOperation {
     UPLOAD("UPLOAD", "上传"),
 
     /** 下载 - 下载文件 */
-    DOWNLOAD("DOWNLOAD", "下载");
+    DOWNLOAD("DOWNLOAD", "下载"),
+
+    /** 查询 - 查询列表或详情 */
+    QUERY("QUERY", "查询");
 
     /** 操作编码 */
     private final String code;

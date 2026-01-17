@@ -65,7 +65,8 @@ export default function OperationLogPage() {
             const params: LogQueryParams = {
                 page,
                 pageSize,
-                keyword: keyword || undefined,
+                // 使用 usernameKeyword 同时搜索用户名、昵称和日志详情
+                usernameKeyword: keyword || undefined,
                 module: moduleFilter !== 'all' ? moduleFilter : undefined,
                 operation: operationFilter !== 'all' ? operationFilter : undefined,
                 startDate: startDate || undefined,
@@ -195,7 +196,7 @@ export default function OperationLogPage() {
                         {/* 关键词搜索 */}
                         <div className="flex gap-2 flex-1 min-w-50">
                             <Input
-                                placeholder="搜索日志详情..."
+                                placeholder="搜索用户名/日志详情..."
                                 value={keyword}
                                 onChange={(e) => setKeyword(e.target.value)}
                                 onKeyDown={(e) => e.key === 'Enter' && handleSearch()}

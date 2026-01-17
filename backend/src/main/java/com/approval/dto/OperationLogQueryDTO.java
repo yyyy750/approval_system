@@ -26,6 +26,9 @@ public class OperationLogQueryDTO {
     /** 用户ID筛选 */
     private Long userId;
 
+    /** 用户名/昵称关键词搜索 */
+    private String usernameKeyword;
+
     /** 目标业务ID */
     private String targetId;
 

@@ -58,6 +58,8 @@ export interface LogQueryParams {
     endDate?: string
     /** 详情关键词搜索 */
     keyword?: string
+    /** 用户名/昵称关键词搜索 */
+    usernameKeyword?: string
 }
 
 /**
