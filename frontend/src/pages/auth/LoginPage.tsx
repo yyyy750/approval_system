@@ -76,14 +76,9 @@ export default function LoginPage() {
             await login(data.username, data.password)
             navigate('/dashboard')
         } catch (err) {
-            // 处理登录失败
-            const errorMessage = err instanceof Error ? err.message : '登录失败，请检查用户名和密码'
-            // 尝试从 API 响应中获取错误信息
-            const axiosError = err as { response?: { data?: { message?: string } } }
-            const finalMessage = axiosError.response?.data?.message || errorMessage
-
-            setGlobalError(finalMessage)
             console.error('登录错误:', err)
+            // 统一显示通用错误信息，不暴露具体原因（如用户不存在或密码错误）
+            setGlobalError('登录失败，请检查用户名或密码')
         } finally {
             setIsLoading(false)
         }

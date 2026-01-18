@@ -83,7 +83,7 @@ export default function DashboardPage() {
             return () => cancelAnimationFrame(raf)
         }, [value, duration])
         return <span>{display}</span>
-    }
+    }   
 
     return (
         <div className="min-h-screen bg-background">
