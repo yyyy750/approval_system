@@ -6,6 +6,7 @@
  */
 
 import { Link, useLocation } from 'react-router-dom'
+import { motion, type Variants } from 'framer-motion'
 import {
     LayoutDashboard,
     LogOut,
@@ -30,6 +31,27 @@ import {
 } from "@/components/ui/sheet"
 import { VisuallyHidden } from '@radix-ui/react-visually-hidden'
 
+const MotionLink = motion(Link)
+
+const containerVariants: Variants = {
+    hidden: { opacity: 0 },
+    visible: {
+        opacity: 1,
+        transition: {
+            staggerChildren: 0.1,
+            delayChildren: 0.2
+        }
+    }
+}
+
+const itemVariants: Variants = {
+    hidden: { y: 20, opacity: 0 },
+    visible: {
+        y: 0,
+        opacity: 1,
+        transition: { type: 'spring', stiffness: 300, damping: 24 }
+    }
+}
 
 interface SidebarProps {
     className?: string
@@ -108,13 +130,18 @@ export function Sidebar({ className }: SidebarProps) {
 
             {/* 导航菜单 */}
             <div className="flex-1 py-6 overflow-y-auto">
-                <nav className="flex flex-col items-center gap-3">
+                <motion.nav
+                    className="flex flex-col items-center gap-3"
+                    initial="hidden"
+                    animate="visible"
+                    variants={containerVariants}
+                >
                     {navItems.map((link) => {
                         const Icon = link.icon
                         const isActive = link.isActive()
 
                         return (
-                            <Link
+                            <MotionLink
                                 key={link.href}
                                 to={link.href}
                                 title={link.label}
@@ -125,24 +152,30 @@ export function Sidebar({ className }: SidebarProps) {
                                         : 'border-transparent text-muted-foreground hover:bg-muted/60 hover:text-foreground'
                                 )}
                                 onClick={() => setOpen(false)}
+                                variants={itemVariants}
                             >
                                 <Icon className="h-5 w-5" />
                                 <span className="sr-only">{link.label}</span>
-                            </Link>
+                            </MotionLink>
                         )
                     })}
-                </nav>
+                </motion.nav>
             </div>
 
             {isAdmin && (
                 <div className="py-4 border-t">
-                    <nav className="flex flex-col items-center gap-3">
+                    <motion.nav
+                        className="flex flex-col items-center gap-3"
+                        initial="hidden"
+                        animate="visible"
+                        variants={containerVariants}
+                    >
                         {adminItems.map((link) => {
                             const Icon = link.icon
                             const isActive = pathname.startsWith(link.match)
 
                             return (
-                                <Link
+                                <MotionLink
                                     key={link.href}
                                     to={link.href}
                                     title={link.label}
@@ -153,13 +186,14 @@ export function Sidebar({ className }: SidebarProps) {
                                             : 'border-transparent text-muted-foreground hover:bg-muted/60 hover:text-foreground'
                                     )}
                                     onClick={() => setOpen(false)}
+                                    variants={itemVariants}
                                 >
                                     <Icon className="h-5 w-5" />
                                     <span className="sr-only">{link.label}</span>
-                                </Link>
+                                </MotionLink>
                             )
                         })}
-                    </nav>
+                    </motion.nav>
                 </div>
             )}
 

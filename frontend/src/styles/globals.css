@@ -38,6 +38,7 @@
   /* 自定义动画 */
   --animate-fade-in: fade-in 0.3s ease-out;
   --animate-slide-up: slide-up 0.3s ease-out;
+  --animate-spring-in: spring-in 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 
   /* 字体 */
   --font-sans: 'Inter', system-ui, sans-serif;
@@ -70,14 +71,34 @@
   0% {
     transform: translate(0px, 0px) scale(1);
   }
+
   33% {
     transform: translate(30px, -50px) scale(1.1);
   }
+
   66% {
     transform: translate(-20px, 20px) scale(0.9);
   }
+
   100% {
     transform: translate(0px, 0px) scale(1);
+  }
+}
+
+@keyframes spring-in {
+  0% {
+    transform: scale(0.95);
+    opacity: 0;
+  }
+
+  60% {
+    transform: scale(1.05);
+    opacity: 1;
+  }
+
+  100% {
+    transform: scale(1);
+    opacity: 1;
   }
 }
 
@@ -358,9 +379,11 @@
   .h-48.overflow-y-auto::-webkit-scrollbar {
     width: 8px;
   }
+
   .h-48.overflow-y-auto::-webkit-scrollbar-track {
     @apply bg-transparent rounded;
   }
+
   .h-48.overflow-y-auto::-webkit-scrollbar-thumb {
     @apply bg-border rounded hover:bg-muted-foreground/30 transition-colors;
   }
@@ -394,4 +417,3 @@
 .switching-to-dark::view-transition-new(root) {
   z-index: 1;
 }
-
