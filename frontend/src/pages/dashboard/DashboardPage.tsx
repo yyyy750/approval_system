@@ -65,26 +65,6 @@ export default function DashboardPage() {
         }
     }
 
-    const AnimatedNumber = ({ value, duration = 1.2 }: { value: number; duration?: number }) => {
-        const [display, setDisplay] = useState(0)
-        useEffect(() => {
-            const start = performance.now()
-            const from = 0
-            const change = value - from
-            const d = duration * 1000
-            let raf = 0
-            const tick = (now: number) => {
-                const p = Math.min((now - start) / d, 1)
-                const eased = 1 - Math.pow(1 - p, 3)
-                setDisplay(Math.round(from + change * eased))
-                if (p < 1) raf = requestAnimationFrame(tick)
-            }
-            raf = requestAnimationFrame(tick)
-            return () => cancelAnimationFrame(raf)
-        }, [value, duration])
-        return <span>{display}</span>
-    }
-
     return (
         <div className="min-h-screen bg-background">
 
