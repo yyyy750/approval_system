@@ -57,7 +57,7 @@ export default function ProfilePage() {
     const [userDetail, setUserDetail] = useState<User | null>(null);
     const [avatar, setAvatar] = useState<string | null>(null);
     const [changingPassword, setChangingPassword] = useState(false);
-    
+
     // Dialog states
     const [showEditProfile, setShowEditProfile] = useState(false);
     const [showChangePassword, setShowChangePassword] = useState(false);
@@ -150,7 +150,7 @@ export default function ProfilePage() {
         setAvatarUploadProgress(0);
 
         try {
-            const attachment = await uploadFile(file, setAvatarUploadProgress);
+            const attachment = await uploadFile(file, 'avatar', setAvatarUploadProgress);
             const updated = await updateUser(userDetail.id, {
                 username: userDetail.username,
                 nickname: userDetail.nickname,
@@ -247,7 +247,7 @@ export default function ProfilePage() {
 
     // Helper component for rows
     const InfoRow = ({ label, value, onClick, className }: { label: string, value: string | React.ReactNode, onClick?: () => void, className?: string }) => (
-        <div 
+        <div
             className={`flex items-center justify-between py-4 px-6 transition-colors ${onClick ? 'cursor-pointer hover:bg-muted/30' : ''} ${className || ''}`}
             onClick={onClick}
         >
@@ -265,7 +265,7 @@ export default function ProfilePage() {
             description="管理有助于我们更好地为您服务的详细信息。"
         >
             <div className="max-w-3xl mx-auto space-y-8">
-                
+
                 {/* 基本信息卡片 */}
                 <Card className="overflow-hidden">
                     <CardHeader className="pb-4 border-b bg-muted/10 flex flex-row items-center justify-between space-y-0">
@@ -280,7 +280,7 @@ export default function ProfilePage() {
                     </CardHeader>
                     <CardContent className="p-0 divide-y">
                         {/* 头像行 */}
-                        <div 
+                        <div
                             className="flex items-center justify-between py-4 px-6 hover:bg-muted/30 cursor-pointer transition-colors"
                             onClick={handleAvatarClick}
                         >
@@ -319,21 +319,21 @@ export default function ProfilePage() {
                         </div>
 
                         {/* 文本信息行 */}
-                        <InfoRow 
-                            label="用户名" 
-                            value={userDetail?.username} 
+                        <InfoRow
+                            label="用户名"
+                            value={userDetail?.username}
                         />
-                        <InfoRow 
-                            label="昵称" 
-                            value={userDetail?.nickname} 
+                        <InfoRow
+                            label="昵称"
+                            value={userDetail?.nickname}
                         />
-                        <InfoRow 
-                            label="邮箱" 
-                            value={userDetail?.email} 
+                        <InfoRow
+                            label="邮箱"
+                            value={userDetail?.email}
                         />
-                        <InfoRow 
-                            label="手机号" 
-                            value={userDetail?.phone} 
+                        <InfoRow
+                            label="手机号"
+                            value={userDetail?.phone}
                         />
                     </CardContent>
                 </Card>
@@ -348,10 +348,10 @@ export default function ProfilePage() {
                         <CardDescription>管理您的密码和账号状态。</CardDescription>
                     </CardHeader>
                     <CardContent className="p-0 divide-y">
-                        <InfoRow 
-                            label="密码" 
-                            value="••••••••" 
-                            onClick={() => setShowChangePassword(true)} 
+                        <InfoRow
+                            label="密码"
+                            value="••••••••"
+                            onClick={() => setShowChangePassword(true)}
                         />
                         <div className="flex items-center justify-between py-4 px-6">
                             <div className="flex-1">
@@ -364,7 +364,7 @@ export default function ProfilePage() {
                                         </span>
                                     ) : (
                                         <span className="text-destructive font-medium flex items-center gap-1">
-                                             <div className="w-2 h-2 rounded-full bg-destructive"></div>
+                                            <div className="w-2 h-2 rounded-full bg-destructive"></div>
                                             已禁用
                                         </span>
                                     )}
