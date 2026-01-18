@@ -30,12 +30,13 @@ interface StatCardProps {
     icon: React.ReactNode
     colorClass: string
     onClick?: () => void
+    className?: string
 }
 
-function StatCard({ title, value, description, icon, colorClass, onClick }: StatCardProps) {
+function StatCard({ title, value, description, icon, colorClass, onClick, className }: StatCardProps) {
     return (
         <Card
-            className={`hover:shadow-lg transition-shadow duration-200 ${onClick ? 'cursor-pointer' : ''}`}
+            className={`glass-card hover:shadow-lg transition-shadow duration-200 ${onClick ? 'cursor-pointer' : ''} ${className || ''}`}
             onClick={onClick}
         >
             <CardHeader className="flex flex-row items-center justify-between pb-2">
@@ -71,20 +72,14 @@ export default function DashboardPage() {
     }
 
     return (
-        <div className="min-h-screen bg-background">
-
-            {/* 主内容区 */}
-            <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-                {/* 欢迎区域 */}
+        <div className="min-h-screen">
+            <main className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
                 <div className="mb-8">
                     <h1 className="text-3xl font-bold">控制台</h1>
-                    <p className="text-muted-foreground mt-1">
-                        查看和管理您的审批事项
-                    </p>
+                    <p className="text-muted-foreground mt-1">查看和管理您的审批事项</p>
                 </div>
 
-                {/* 统计卡片 */}
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                <div className="grid grid-cols-12 gap-4">
                     <StatCard
                         title="待处理"
                         value={stats.pending}
@@ -95,7 +90,8 @@ export default function DashboardPage() {
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                             </svg>
                         }
-                        onClick={() => navigate('/approval?status=pending')}
+                        onClick={() => navigate('/approval?tab=todo')}
+                        className="col-span-12 md:col-span-6 xl:col-span-3"
                     />
                     <StatCard
                         title="已通过"
@@ -107,7 +103,8 @@ export default function DashboardPage() {
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                             </svg>
                         }
-                        onClick={() => navigate('/approval?status=approved')}
+                        onClick={() => navigate('/approval?status=3')}
+                        className="col-span-12 md:col-span-6 xl:col-span-3"
                     />
                     <StatCard
                         title="已拒绝"
@@ -119,7 +116,8 @@ export default function DashboardPage() {
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                             </svg>
                         }
-                        onClick={() => navigate('/approval?status=rejected')}
+                        onClick={() => navigate('/approval?status=4')}
+                        className="col-span-12 md:col-span-6 xl:col-span-3"
                     />
                     <StatCard
                         title="总计"
@@ -132,12 +130,22 @@ export default function DashboardPage() {
                             </svg>
                         }
                         onClick={() => navigate('/approval')}
+                        className="col-span-12 md:col-span-6 xl:col-span-3"
                     />
-                </div>
 
-                {/* 快捷操作 */}
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                    <Card>
+                    <Card className="glass-card col-span-12 xl:col-span-6 xl:row-span-2">
+                        <CardHeader>
+                            <CardTitle>效率趋势</CardTitle>
+                            <CardDescription>审批完成效率与周期</CardDescription>
+                        </CardHeader>
+                        <CardContent>
+                            <div className="flex h-56 items-center justify-center rounded-xl border border-dashed border-muted/60 text-sm text-muted-foreground">
+                                预留趋势图表区域
+                            </div>
+                        </CardContent>
+                    </Card>
+
+                    <Card className="glass-card col-span-12 xl:col-span-6">
                         <CardHeader>
                             <CardTitle>快捷操作</CardTitle>
                             <CardDescription>常用功能入口</CardDescription>
@@ -187,7 +195,7 @@ export default function DashboardPage() {
                         </CardContent>
                     </Card>
 
-                    <Card>
+                    <Card className="glass-card col-span-12 xl:col-span-6">
                         <CardHeader>
                             <CardTitle>最近活动</CardTitle>
                             <CardDescription>您的最新操作记录</CardDescription>
