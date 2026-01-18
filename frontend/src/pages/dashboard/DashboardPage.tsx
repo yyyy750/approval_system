@@ -5,6 +5,7 @@
  */
 
 import { useNavigate } from 'react-router-dom'
+import { useEffect, useState } from 'react'
 import { Button } from '@/components/ui/button'
 import {
     Card,
@@ -13,46 +14,11 @@ import {
     CardHeader,
     CardTitle,
 } from '@/components/ui/card'
+import dashboardService, { type RecentActivity } from '@/services/dashboardService'
+import { toast } from 'sonner'
+import { useAuthStore } from '@/stores/authStore'
+import { motion } from 'framer-motion'
 
-/**
- * 统计卡片组件
- *
- * [title] 标题
- * [value] 数值
- * [description] 描述
- * [icon] 图标
- * [colorClass] 颜色类名
- */
-interface StatCardProps {
-    title: string
-    value: string | number
-    description: string
-    icon: React.ReactNode
-    colorClass: string
-    onClick?: () => void
-}
-
-function StatCard({ title, value, description, icon, colorClass, onClick }: StatCardProps) {
-    return (
-        <Card
-            className={`hover:shadow-lg transition-shadow duration-200 ${onClick ? 'cursor-pointer' : ''}`}
-            onClick={onClick}
-        >
-            <CardHeader className="flex flex-row items-center justify-between pb-2">
-                <CardTitle className="text-sm font-medium text-muted-foreground">
-                    {title}
-                </CardTitle>
-                <div className={`p-2 rounded-md ${colorClass}`}>
-                    {icon}
-                </div>
-            </CardHeader>
-            <CardContent>
-                <div className="text-2xl font-bold">{value}</div>
-                <p className="text-xs text-muted-foreground mt-1">{description}</p>
-            </CardContent>
-        </Card>
-    )
-}
 
 /**
  * 仪表盘页面
@@ -61,13 +27,62 @@ function StatCard({ title, value, description, icon, colorClass, onClick }: Stat
  */
 export default function DashboardPage() {
     const navigate = useNavigate()
+    const { user } = useAuthStore()
 
-    // 模拟统计数据
-    const stats = {
-        pending: 5,
-        approved: 12,
-        rejected: 3,
-        total: 20,
+    const [activities, setActivities] = useState<RecentActivity[]>([])
+    const [loading, setLoading] = useState(true)
+
+    // 加载数据
+    useEffect(() => {
+        loadData()
+    }, [])
+
+    /**
+     * 加载仪表盘数据
+     */
+    const loadData = async () => {
+        try {
+            setLoading(true)
+            const activitiesData = await dashboardService.getRecentActivities(5)
+            setActivities(activitiesData)
+        } catch (error) {
+            console.error('加载数据失败:', error)
+            toast.error('加载数据失败')
+        } finally {
+            setLoading(false)
+        }
+    }
+
+    const itemVariants = {
+        hidden: { opacity: 0, y: 8 },
+        show: { opacity: 1, y: 0 }
+    }
+
+    const listVariants = {
+        hidden: {},
+        show: {
+            transition: { staggerChildren: 0.08 }
+        }
+    }
+
+    const AnimatedNumber = ({ value, duration = 1.2 }: { value: number; duration?: number }) => {
+        const [display, setDisplay] = useState(0)
+        useEffect(() => {
+            const start = performance.now()
+            const from = 0
+            const change = value - from
+            const d = duration * 1000
+            let raf = 0
+            const tick = (now: number) => {
+                const p = Math.min((now - start) / d, 1)
+                const eased = 1 - Math.pow(1 - p, 3)
+                setDisplay(Math.round(from + change * eased))
+                if (p < 1) raf = requestAnimationFrame(tick)
+            }
+            raf = requestAnimationFrame(tick)
+            return () => cancelAnimationFrame(raf)
+        }, [value, duration])
+        return <span>{display}</span>
     }
 
     return (
@@ -75,147 +90,119 @@ export default function DashboardPage() {
 
             {/* 主内容区 */}
             <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-                {/* 欢迎区域 */}
+                {/* 欢迎区域 - 仿 awwwards.com 风格 */}
+                <motion.div 
+                    initial={{ opacity: 0, y: -20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.5 }}
+                    className="mb-8 relative overflow-hidden rounded-2xl bg-gradient-to-br from-primary/10 to-secondary/10 p-8 md:p-12"
+                >
+                    {/* 背景装饰元素 */}
+                    <div className="absolute -top-20 -right-20 w-64 h-64 bg-primary/20 rounded-full blur-3xl"></div>
+                    <div className="absolute -bottom-20 -left-20 w-64 h-64 bg-secondary/20 rounded-full blur-3xl"></div>
+                    
+                    {/* Blob 动画效果 */}
+                    <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none">
+                        <div className="absolute top-1/4 right-1/4 w-40 h-40 bg-primary/10 rounded-full blur-3xl animate-blob"></div>
+                        <div className="absolute top-1/3 left-1/4 w-32 h-32 bg-secondary/10 rounded-full blur-3xl animate-blob animation-delay-2000"></div>
+                        <div className="absolute bottom-1/4 right-1/3 w-48 h-48 bg-accent/10 rounded-full blur-3xl animate-blob animation-delay-4000"></div>
+                    </div>
+                    
+                    <div className="relative z-10">
+                        <h1 className="text-5xl md:text-6xl lg:text-7xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-primary to-secondary mb-8">
+                            欢迎回来，{user?.username || '用户'}！
+                        </h1>
+                        <p className="text-lg text-muted-foreground whitespace-nowrap overflow-x-auto">
+                            发现、创建和管理您的审批流程。在这里，您可以轻松跟踪、审批和协作处理各种事务。
+                        </p>
+                        
+                        <div className="mt-6 flex flex-wrap gap-4">
+                            <motion.div
+                                whileHover={{ scale: 1.05 }}
+                                whileTap={{ scale: 0.95 }}
+                            >
+                                <Button 
+                                    onClick={() => navigate('/approval/new')}
+                                    className="rounded-full px-6 py-2 bg-primary text-primary-foreground hover:bg-primary/90"
+                                >
+                                    创建新审批
+                                </Button>
+                            </motion.div>
+                            <motion.div
+                                whileHover={{ scale: 1.05 }}
+                                whileTap={{ scale: 0.95 }}
+                            >
+                                <Button 
+                                    variant="outline"
+                                    onClick={() => navigate('/approval')}
+                                    className="rounded-full px-6 py-2"
+                                >
+                                    查看全部
+                                </Button>
+                            </motion.div>
+                        </div>
+                    </div>
+                </motion.div>
+
+
+                {/* 最近活动（在欢迎区域下方） */}
                 <div className="mb-8">
-                    <h1 className="text-3xl font-bold">控制台</h1>
-                    <p className="text-muted-foreground mt-1">
-                        查看和管理您的审批事项
-                    </p>
-                </div>
-
-                {/* 统计卡片 */}
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-                    <StatCard
-                        title="待处理"
-                        value={stats.pending}
-                        description="需要您审批的事项"
-                        colorClass="bg-yellow-100 text-yellow-600 dark:bg-yellow-900/30 dark:text-yellow-400"
-                        icon={
-                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                            </svg>
-                        }
-                        onClick={() => navigate('/approval?status=pending')}
-                    />
-                    <StatCard
-                        title="已通过"
-                        value={stats.approved}
-                        description="本月已通过审批"
-                        colorClass="bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400"
-                        icon={
-                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                            </svg>
-                        }
-                        onClick={() => navigate('/approval?status=approved')}
-                    />
-                    <StatCard
-                        title="已拒绝"
-                        value={stats.rejected}
-                        description="本月已拒绝审批"
-                        colorClass="bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400"
-                        icon={
-                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                            </svg>
-                        }
-                        onClick={() => navigate('/approval?status=rejected')}
-                    />
-                    <StatCard
-                        title="总计"
-                        value={stats.total}
-                        description="本月总审批数量"
-                        colorClass="bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400"
-                        icon={
-                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-                            </svg>
-                        }
-                        onClick={() => navigate('/approval')}
-                    />
-                </div>
-
-                {/* 快捷操作 */}
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                    <Card>
-                        <CardHeader>
-                            <CardTitle>快捷操作</CardTitle>
-                            <CardDescription>常用功能入口</CardDescription>
-                        </CardHeader>
-                        <CardContent className="grid grid-cols-2 gap-4">
-                            <Button
-                                variant="outline"
-                                className="h-20 flex flex-col gap-2 cursor-pointer"
-                                onClick={() => navigate('/approval')}
-                            >
-                                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
-                                </svg>
-                                审批列表
-                            </Button>
-                            <Button
-                                variant="outline"
-                                className="h-20 flex flex-col gap-2 cursor-pointer"
-                                onClick={() => navigate('/approval/new')}
-                            >
-                                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-                                </svg>
-                                发起审批
-                            </Button>
-                            <Button
-                                variant="outline"
-                                className="h-20 flex flex-col gap-2 cursor-pointer"
-                                onClick={() => navigate('/admin/workflows')}
-                            >
-                                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                                </svg>
-                                系统设置
-                            </Button>
-                            <Button
-                                variant="outline"
-                                className="h-20 flex flex-col gap-2 cursor-pointer"
-                                onClick={() => navigate('/profile')}
-                            >
-                                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                                </svg>
-                                个人中心
-                            </Button>
-                        </CardContent>
-                    </Card>
-
                     <Card>
                         <CardHeader>
                             <CardTitle>最近活动</CardTitle>
                             <CardDescription>您的最新操作记录</CardDescription>
                         </CardHeader>
                         <CardContent>
-                            <div className="space-y-4">
-                                <div className="flex items-center gap-4">
-                                    <div className="w-2 h-2 rounded-full bg-green-500" />
-                                    <div className="flex-1">
-                                        <p className="text-sm font-medium">审批通过 - 请假申请</p>
-                                        <p className="text-xs text-muted-foreground">2 小时前</p>
-                                    </div>
+                            {loading ? (
+                                <div className="h-48 overflow-y-auto space-y-4">
+                                    {[...Array(5)].map((_, i) => (
+                                        <div key={i} className="flex items-center gap-4 animate-pulse">
+                                            <div className="w-2 h-2 rounded-full bg-muted" />
+                                            <div className="flex-1">
+                                                <div className="h-4 bg-muted rounded w-3/4 mb-2"></div>
+                                                <div className="h-3 bg-muted rounded w-1/2"></div>
+                                            </div>
+                                        </div>
+                                    ))}
                                 </div>
-                                <div className="flex items-center gap-4">
-                                    <div className="w-2 h-2 rounded-full bg-yellow-500" />
-                                    <div className="flex-1">
-                                        <p className="text-sm font-medium">待审批 - 报销申请</p>
-                                        <p className="text-xs text-muted-foreground">5 小时前</p>
-                                    </div>
+                            ) : activities.length > 0 ? (
+                                <motion.div
+                                    className="h-48 overflow-y-auto space-y-4 pr-2"
+                                    variants={listVariants}
+                                    initial="hidden"
+                                    animate="show"
+                                >
+                                    {activities.map((activity) => (
+                                        <motion.div
+                                            key={activity.approvalId}
+                                            variants={itemVariants}
+                                            whileHover={{ scale: 1.01 }}
+                                            className="flex items-center gap-4 cursor-pointer hover:bg-muted/50 p-2 rounded-md transition-colors"
+                                            onClick={() => navigate(`/approval/${activity.approvalId}`)}
+                                        >
+                                            <div className={`w-2 h-2 rounded-full ${
+                                                activity.activityType === 'approved' ? 'bg-green-500' :
+                                                activity.activityType === 'rejected' ? 'bg-red-500' :
+                                                activity.activityType === 'withdrawn' ? 'bg-gray-500' :
+                                                'bg-blue-500'
+                                            }`} />
+                                            <div className="flex-1">
+                                                <p className="text-sm font-medium">
+                                                    {activity.activityType === 'approved' ? '已通过' :
+                                                     activity.activityType === 'rejected' ? '已拒绝' :
+                                                     activity.activityType === 'withdrawn' ? '已撤回' :
+                                                     '已提交'} - {activity.title}
+                                                </p>
+                                                <p className="text-xs text-muted-foreground">{activity.relativeTime}</p>
+                                            </div>
+                                        </motion.div>
+                                    ))}
+                                </motion.div>
+                            ) : (
+                                <div className="h-48 flex items-center justify-center text-center text-muted-foreground">
+                                    <p>暂无活动记录</p>
                                 </div>
-                                <div className="flex items-center gap-4">
-                                    <div className="w-2 h-2 rounded-full bg-blue-500" />
-                                    <div className="flex-1">
-                                        <p className="text-sm font-medium">已提交 - 采购申请</p>
-                                        <p className="text-xs text-muted-foreground">昨天</p>
-                                    </div>
-                                </div>
-                            </div>
+                            )}
                         </CardContent>
                     </Card>
                 </div>
